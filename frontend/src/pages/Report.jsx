@@ -357,42 +357,46 @@ export default function Report() {
               <table className="w-full text-sm border border-navy-50 rounded-lg overflow-hidden">
                 <thead>
                   <tr className="bg-navy-50/60 text-left text-xs uppercase tracking-wide text-navy-400">
-                    <th className="py-2 px-3">S.No</th>
-                    <th className="py-2 px-3">Name</th>
-                    <th className="py-2 px-3">Age</th>
-                    <th className="py-2 px-3">Gender</th>
-                    <th className="py-2 px-3">Blood grp</th>
-                    <th className="py-2 px-3">HR (BPM)</th>
-                    <th className="py-2 px-3">SpO2 (%)</th>
-                    <th className="py-2 px-3">BP (mmHg)</th>
-                    <th className="py-2 px-3">ECG RAW</th>
-                    <th className="py-2 px-3">PPG RAW</th>
-                    <th className="py-2 px-3">PI (%)</th>
-                    <th className="py-2 px-3">Signal Quality</th>
-                    <th className="py-2 px-3">Duration (s)</th>
+                    <th className="py-2.5 px-3 w-12 text-center">S.No</th>
+                    <th className="py-2.5 px-3 min-w-[140px]">Name</th>
+                    <th className="py-2.5 px-3 text-center">Age</th>
+                    <th className="py-2.5 px-3">Gender</th>
+                    <th className="py-2.5 px-3">Blood grp</th>
+                    <th className="py-2.5 px-3 text-center">HR (BPM)</th>
+                    <th className="py-2.5 px-3 text-center">SpO2 (%)</th>
+                    <th className="py-2.5 px-3 text-center">BP (mmHg)</th>
+                    <th className="py-2.5 px-3 text-center">ECG RAW</th>
+                    <th className="py-2.5 px-3 text-center">PPG RAW</th>
+                    <th className="py-2.5 px-3 text-center">PI (%)</th>
+                    <th className="py-2.5 px-3">Signal Quality</th>
+                    <th className="py-2.5 px-3 text-center">Duration (s)</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-t border-navy-50">
-                    <td className="py-2 px-3 font-medium">1</td>
-                    <td className="py-2 px-3 font-medium">{generated.patient.name}</td>
-                    <td className="py-2 px-3">{generated.patient.age}</td>
-                    <td className="py-2 px-3">{generated.patient.gender}</td>
-                    <td className="py-2 px-3">{generated.patient.bloodGroup}</td>
-                    <td className="py-2 px-3 text-teal-600 font-medium">{generated.session.avgBpm ?? "—"}</td>
-                    <td className="py-2 px-3 text-teal-600 font-medium">{generated.session.avgSpo2 ? `${generated.session.avgSpo2}%` : "—"}</td>
-                    <td className="py-2 px-3 text-teal-600 font-medium">
+                    <td className="py-2.5 px-3 font-medium text-center">1</td>
+                    <td className="py-2.5 px-3 font-semibold text-navy-900 dark:text-offwhite whitespace-nowrap">{generated.patient.name}</td>
+                    <td className="py-2.5 px-3 text-center whitespace-nowrap">{generated.patient.age}</td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">{generated.patient.gender}</td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-navy-50 dark:bg-navy-900 border border-navy-100 dark:border-navy-700">
+                        {generated.patient.bloodGroup}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-teal-600 font-medium text-center whitespace-nowrap">{generated.session.avgBpm ?? "—"}</td>
+                    <td className="py-2.5 px-3 text-teal-600 font-medium text-center whitespace-nowrap">{generated.session.avgSpo2 ? `${generated.session.avgSpo2}%` : "—"}</td>
+                    <td className="py-2.5 px-3 text-teal-600 font-medium text-center whitespace-nowrap">
                       {generated.session.avgSystolic != null ? `${generated.session.avgSystolic}/${generated.session.avgDiastolic}` : "—"}
                     </td>
-                    <td className="py-2 px-3 font-mono">{generated.session.ecgRaw ?? "512"}</td>
-                    <td className="py-2 px-3 font-mono">{generated.session.ppgRaw ?? "480"}</td>
-                    <td className="py-2 px-3 font-mono">{generated.session.perfusionIndex != null ? `${generated.session.perfusionIndex}%` : "4.2%"}</td>
-                    <td className="py-2 px-3">
-                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700">
+                    <td className="py-2.5 px-3 font-mono text-purple-600 dark:text-purple-400 text-center whitespace-nowrap">{generated.session.ecgRaw ?? "512"}</td>
+                    <td className="py-2.5 px-3 font-mono text-indigo-600 dark:text-indigo-400 text-center whitespace-nowrap">{generated.session.ppgRaw ?? "480"}</td>
+                    <td className="py-2.5 px-3 font-mono text-teal-600 dark:text-teal-400 text-center whitespace-nowrap">{generated.session.perfusionIndex != null ? `${generated.session.perfusionIndex}%` : "4.2%"}</td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                         {generated.session.signalQuality || "Good (98%)"}
                       </span>
                     </td>
-                    <td className="py-2 px-3">{Math.round(generated.session.durationSec)}s</td>
+                    <td className="py-2.5 px-3 text-center whitespace-nowrap">{Math.round(generated.session.durationSec)}s</td>
                   </tr>
                 </tbody>
               </table>
@@ -465,18 +469,22 @@ function csvCell(value) {
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-// Draws a bordered, multi-column table with one header row and one data row directly onto the PDF.
+// Draws a bordered, multi-column table with custom proportional column widths directly onto the PDF.
 function drawWideTable(doc, headers, row, x, y, width, navyColor, tealColor, lightGray) {
-  const colW = width / headers.length;
+  // Proportional widths summing to ~253mm for landscape A4 report (Name given 45mm so it never overlaps with Age)
+  const colWidths = [12, 45, 14, 18, 18, 18, 16, 19, 18, 18, 16, 25, 16];
   const rowH = 8;
 
   doc.setFillColor(...lightGray);
   doc.rect(x, y - 5, width, rowH, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
-  doc.setTextColor(...[110, 122, 140]);
+  doc.setTextColor(110, 122, 140);
+  let curX = x;
   headers.forEach((h, i) => {
-    doc.text(h.toUpperCase(), x + i * colW + 2, y);
+    const w = colWidths[i] || 18;
+    doc.text(h.toUpperCase(), curX + 2, y);
+    curX += w;
   });
   y += rowH;
 
@@ -484,10 +492,22 @@ function drawWideTable(doc, headers, row, x, y, width, navyColor, tealColor, lig
   doc.setLineWidth(0.2);
   doc.rect(x, y - 5, width, rowH);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(...navyColor);
+  curX = x;
   row.forEach((v, i) => {
-    doc.text(String(v), x + i * colW + 2, y);
+    const w = colWidths[i] || 18;
+    let text = String(v ?? "—");
+    // Ensure text never bleeds into adjacent column
+    const maxTextW = w - 3;
+    if (doc.getTextWidth(text) > maxTextW) {
+      while (text.length > 2 && doc.getTextWidth(text + "…") > maxTextW) {
+        text = text.slice(0, -1);
+      }
+      text += "…";
+    }
+    doc.text(text, curX + 2, y);
+    curX += w;
   });
   y += rowH;
   return y;
