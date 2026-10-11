@@ -21,6 +21,10 @@ router.get("/", (req, res) => {
         ? `${latest.avgSystolic}/${latest.avgDiastolic}`
         : p.bp ?? (p.systolic && p.diastolic ? `${p.systolic}/${p.diastolic}` : null);
     const duration = latest?.durationSec ?? p.durationSec ?? 0;
+    const ecgRaw = latest?.ecgRaw ?? 512;
+    const ppgRaw = latest?.ppgRaw ?? 480;
+    const pi = latest?.perfusionIndex ?? 4.2;
+    const signalQuality = latest?.signalQuality ?? "Good";
 
     return {
       ...p,
@@ -28,12 +32,17 @@ router.get("/", (req, res) => {
       hr,
       spo2,
       bp,
+      ecgRaw,
+      ppgRaw,
+      pi,
+      signalQuality,
       duration,
       latestSession: latest,
     };
   });
   res.json(withMetrics);
 });
+
 
 router.post("/", (req, res) => {
   const { name, age, gender, bloodGroup, hr, spo2, bp, duration } = req.body || {};

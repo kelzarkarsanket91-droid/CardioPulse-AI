@@ -74,7 +74,21 @@ export default function DataPage() {
       alert("No patient data available to download.");
       return;
     }
-    const headers = ["S.NO", "NAME", "AGE", "GENDER", "BLOOD GRP", "HR (BPM)", "SPO2 (%)", "BP (MMHG)", "DURATION (S)"];
+    const headers = [
+      "S.NO",
+      "NAME",
+      "AGE",
+      "GENDER",
+      "BLOOD GRP",
+      "HR (BPM)",
+      "SPO2 (%)",
+      "BP (MMHG)",
+      "ECG RAW",
+      "PPG RAW",
+      "PI (%)",
+      "SIGNAL QUALITY",
+      "DURATION (S)",
+    ];
     const rows = patientsToExport.map((p, idx) => [
       idx + 1,
       `"${(p.name || "").replace(/"/g, '""')}"`,
@@ -84,6 +98,10 @@ export default function DataPage() {
       p.hr ?? "",
       p.spo2 ?? "",
       p.bp ? `"${p.bp}"` : "",
+      p.ecgRaw ?? "",
+      p.ppgRaw ?? "",
+      p.pi != null ? `${p.pi}%` : "",
+      `"${p.signalQuality || "Good"}"`,
       p.duration ?? 0,
     ]);
     const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
@@ -208,10 +226,14 @@ export default function DataPage() {
                     ["hr", "HR (BPM)"],
                     ["spo2", "SPO2 (%)"],
                     ["bp", "BP (MMHG)"],
+                    ["ecgRaw", "ECG RAW"],
+                    ["ppgRaw", "PPG RAW"],
+                    ["pi", "PI (%)"],
+                    ["signalQuality", "SIGNAL QUALITY"],
                     ["duration", "DURATION (S)"],
                   ].map(([key, label]) => (
                     <th key={key} className="py-3 px-4">
-                      <button onClick={() => toggleSort(key)} className="flex items-center gap-1 hover:text-navy-700 dark:hover:text-offwhite">
+                      <button onClick={() => toggleSort(key)} className="flex items-center gap-1 hover:text-navy-700 dark:hover:text-offwhite whitespace-nowrap">
                         {label} <ArrowUpDown size={12} />
                       </button>
                     </th>
@@ -233,7 +255,7 @@ export default function DataPage() {
                     </td>
                     <td
                       onClick={() => navigate(`/data/${p.id}`)}
-                      className="py-3 px-4 font-semibold text-navy-900 dark:text-offwhite cursor-pointer hover:underline"
+                      className="py-3 px-4 font-semibold text-navy-900 dark:text-offwhite cursor-pointer hover:underline whitespace-nowrap"
                     >
                       {p.name}
                     </td>
@@ -250,10 +272,28 @@ export default function DataPage() {
                     <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono font-medium text-teal-600 dark:text-teal-400 cursor-pointer">
                       {p.spo2 != null ? `${p.spo2}%` : "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono font-medium text-blue-600 dark:text-blue-400 cursor-pointer">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono font-medium text-blue-600 dark:text-blue-400 cursor-pointer whitespace-nowrap">
                       {p.bp || "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-navy-500 dark:text-navy-300 cursor-pointer">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-purple-600 dark:text-purple-400 cursor-pointer">
+                      {p.ecgRaw != null ? p.ecgRaw : "—"}
+                    </td>
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-indigo-600 dark:text-indigo-400 cursor-pointer">
+                      {p.ppgRaw != null ? p.ppgRaw : "—"}
+                    </td>
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-teal-600 dark:text-teal-400 cursor-pointer">
+                      {p.pi != null ? `${p.pi}%` : "—"}
+                    </td>
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 cursor-pointer">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium border ${
+                        (p.signalQuality || "").toLowerCase() === "good"
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                          : "bg-navy-50 dark:bg-navy-900 border-navy-100 dark:border-navy-700 text-navy-600 dark:text-navy-300"
+                      }`}>
+                        {p.signalQuality || "Good"}
+                      </span>
+                    </td>
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-navy-500 dark:text-navy-300 cursor-pointer whitespace-nowrap">
                       {p.duration != null ? `${p.duration}s` : "0s"}
                     </td>
                     <td className="py-3 px-4 text-right">

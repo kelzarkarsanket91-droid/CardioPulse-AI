@@ -3178,7 +3178,28 @@
         "signalQuality": "Good (98%)"
       },
       "generatedAt": "2026-10-11T22:21:37.448Z"
+    },
+    {
+      "id": "96",
+      "serial": "R029",
+      "owner": "1",
+      "patientId": "5",
+      "sessionId": "94",
+      "patientName": "Bhumika Tupe",
+      "notes": "",
+      "summary": {
+        "avgBpm": 73,
+        "avgSpo2": 93,
+        "avgSystolic": 102,
+        "avgDiastolic": 69,
+        "durationSec": 30,
+        "ecgRaw": 482,
+        "ppgRaw": 487,
+        "perfusionIndex": 4.4,
+        "signalQuality": "Good (98%)"
+      },
+      "generatedAt": "2026-10-11T22:34:54.871Z"
     }
   ],
-  "_seq": 96
+  "_seq": 97
 }
