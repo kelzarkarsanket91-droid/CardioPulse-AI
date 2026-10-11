@@ -54,6 +54,19 @@ export default function ProfilePage() {
     }
   }
 
+  function formatPhone(p) {
+    if (!p) return "";
+    const clean = String(p).replace(/\D/g, "");
+    if (clean.length === 10) {
+      return `+91 ${clean.slice(0, 5)} ${clean.slice(5)}`;
+    }
+    if (clean.length === 12 && clean.startsWith("91")) {
+      return `+91 ${clean.slice(2, 7)} ${clean.slice(7)}`;
+    }
+    return `+${clean}`;
+  }
+
+
   return (
     <div className="max-w-xl flex flex-col gap-6">
       <div className="card flex items-center gap-4">
@@ -61,12 +74,13 @@ export default function ProfilePage() {
         <div>
           <h1 className="font-display text-xl font-semibold">{user?.name}</h1>
           <p className="text-navy-400 text-sm">
-            {user?.phone ? `+${user.phone}` : ""}
+            {user?.phone ? formatPhone(user.phone) : ""}
             {user?.phone && user?.email ? " • " : ""}
             {user?.email || ""}
           </p>
         </div>
       </div>
+
 
 
       <form onSubmit={handleSave} className="card flex flex-col gap-4">

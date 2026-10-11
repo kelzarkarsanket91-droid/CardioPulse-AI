@@ -67,6 +67,18 @@
       "notes": "",
       "language": "English",
       "createdAt": "2026-10-11T20:35:17.879Z"
+    },
+    {
+      "id": "91",
+      "name": "Harry",
+      "phone": "8999313719",
+      "email": "kelzarkarsanket91@gmail.com",
+      "passwordHash": "$2a$10$BVKd/SKS91EYMUC1ORJQ5uaQXjCkqneeamfuvp1gs6noeE7QGhWfW",
+      "role": "Patient",
+      "clinic": "",
+      "notes": "",
+      "language": "English",
+      "createdAt": "2026-10-11T21:49:57.427Z"
     }
   ],
   "patients": [
@@ -1234,5 +1246,5 @@
       "generatedAt": "2026-10-11T20:39:04.999Z"
     }
   ],
-  "_seq": 91
+  "_seq": 92
 }
