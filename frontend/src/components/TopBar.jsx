@@ -18,7 +18,7 @@ export default function TopBar() {
 
   return (
     <header className="sticky top-0 z-30 backdrop-blur bg-offwhite/85 dark:bg-navy-950/85 border-b border-navy-50 dark:border-navy-800">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+      <div className="max-w-[1440px] mx-auto flex items-center justify-between px-3 sm:px-6 py-3">
         <Link to="/home" className="flex items-center gap-2.5">
           <Logo size={34} />
           <span className="font-display font-semibold text-lg tracking-tight">CardioPulse Ai</span>

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ArrowUpDown, UserPlus, Download } from "lucide-react";
+import { Search, ArrowUpDown, UserPlus, Download, Maximize2, Smartphone } from "lucide-react";
 import { api } from "../lib/api";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -12,6 +12,10 @@ export default function DataPage() {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState("name");
   const [sortDir, setSortDir] = useState("asc");
+  const [autoFit, setAutoFit] = useState(true);
+  const [scale, setScale] = useState(1);
+  const containerRef = useRef(null);
+  const tableRef = useRef(null);
   const [form, setForm] = useState({
     name: "",
     age: "",
@@ -68,6 +72,44 @@ export default function DataPage() {
     });
     return list;
   }, [patients, query, sortKey, sortDir]);
+
+  useEffect(() => {
+    function updateScale() {
+      if (!autoFit) {
+        setScale(1);
+        return;
+      }
+      if (containerRef.current && tableRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const prevZoom = tableRef.current.style.zoom;
+        tableRef.current.style.zoom = "1";
+        const naturalWidth = tableRef.current.scrollWidth;
+        tableRef.current.style.zoom = prevZoom || "1";
+
+        if (naturalWidth > 0 && containerWidth > 0) {
+          if (containerWidth < naturalWidth) {
+            const ratio = Math.max(0.42, Number((containerWidth / naturalWidth).toFixed(3)));
+            setScale(ratio);
+          } else {
+            setScale(1);
+          }
+        }
+      }
+    }
+
+    updateScale();
+    const t1 = setTimeout(updateScale, 80);
+    const t2 = setTimeout(updateScale, 250);
+    window.addEventListener("resize", updateScale);
+    window.addEventListener("orientationchange", updateScale);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", updateScale);
+      window.removeEventListener("orientationchange", updateScale);
+    };
+  }, [autoFit, visible]);
 
   function downloadCsvData(patientsToExport, filename) {
     if (!patientsToExport || patientsToExport.length === 0) {
@@ -189,6 +231,26 @@ export default function DataPage() {
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
+              type="button"
+              onClick={() => setAutoFit((prev) => !prev)}
+              className={`btn-secondary !text-xs !py-1.5 !px-3 flex items-center gap-1.5 transition ${
+                autoFit && scale < 1
+                  ? "!border-teal-500/60 text-teal-600 dark:text-teal-400 bg-teal-50/70 dark:bg-teal-950/40 shadow-sm"
+                  : ""
+              }`}
+              title="Automatically arrange and scale table to fit whole width in portrait or landscape without horizontal scroll"
+            >
+              {scale < 1 ? <Smartphone size={13} className="text-teal-500 animate-pulse" /> : <Maximize2 size={13} />}
+              <span>
+                {autoFit
+                  ? scale < 1
+                    ? `Auto-fit: ${Math.round(scale * 100)}%`
+                    : "Auto-fit Width"
+                  : "Scroll Mode (100%)"}
+              </span>
+            </button>
+
+            <button
               onClick={() => downloadCsvData(visible, `CardioPulse_Patients_Group_${new Date().toISOString().slice(0, 10)}.csv`)}
               className="btn-secondary !text-xs !py-1.5 !px-3.5 flex items-center gap-1.5"
               title="Download all currently visible patients as a group CSV file"
@@ -196,7 +258,7 @@ export default function DataPage() {
               <Download size={14} className="text-teal-500" /> Download Group CSV ({visible.length})
             </button>
 
-            <div className="relative w-52">
+            <div className="relative w-48 sm:w-52">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-400 pointer-events-none" />
               <input
                 className="input py-1.5 text-sm !pl-9"
@@ -213,11 +275,18 @@ export default function DataPage() {
         ) : visible.length === 0 ? (
           <p className="text-navy-400 text-sm">No patients yet — add your first one above.</p>
         ) : (
-          <div className="overflow-x-auto -mx-5">
-            <table className="w-full text-sm">
+          <div
+            ref={containerRef}
+            className={`w-full ${scale < 1 ? "overflow-hidden" : "overflow-x-auto"} -mx-2 sm:-mx-5 px-2 sm:px-5`}
+          >
+            <table
+              ref={tableRef}
+              style={autoFit && scale < 1 ? { zoom: scale, minWidth: "100%" } : { minWidth: "100%" }}
+              className="w-full text-xs select-text transition-all"
+            >
               <thead>
-                <tr className="text-left text-navy-400 border-b border-navy-50 dark:border-navy-700 uppercase text-xs tracking-wider font-semibold">
-                  <th className="py-3 px-4 text-center w-16">S.NO</th>
+                <tr className="text-left text-navy-400 border-b border-navy-50 dark:border-navy-700 uppercase text-[11px] sm:text-xs tracking-wider font-semibold">
+                  <th className="py-2.5 px-2 text-center w-10">S.NO</th>
                   {[
                     ["name", "NAME"],
                     ["age", "AGE"],
@@ -232,13 +301,16 @@ export default function DataPage() {
                     ["signalQuality", "SIGNAL QUALITY"],
                     ["duration", "DURATION (S)"],
                   ].map(([key, label]) => (
-                    <th key={key} className="py-3 px-4">
-                      <button onClick={() => toggleSort(key)} className="flex items-center gap-1 hover:text-navy-700 dark:hover:text-offwhite whitespace-nowrap">
-                        {label} <ArrowUpDown size={12} />
+                    <th key={key} className="py-2.5 px-1.5 md:px-2">
+                      <button
+                        onClick={() => toggleSort(key)}
+                        className="flex items-center gap-0.5 hover:text-navy-700 dark:hover:text-offwhite whitespace-nowrap"
+                      >
+                        {label} <ArrowUpDown size={11} className="opacity-60" />
                       </button>
                     </th>
                   ))}
-                  <th className="py-3 px-4 text-right">ACTION</th>
+                  <th className="py-2.5 px-2 text-right">ACTION</th>
                 </tr>
               </thead>
               <tbody>
@@ -249,43 +321,43 @@ export default function DataPage() {
                   >
                     <td
                       onClick={() => navigate(`/data/${p.id}`)}
-                      className="py-3 px-4 text-center font-mono text-xs text-navy-400 font-medium cursor-pointer"
+                      className="py-2 px-2 text-center font-mono text-xs text-navy-400 font-medium cursor-pointer"
                     >
                       {index + 1}
                     </td>
                     <td
                       onClick={() => navigate(`/data/${p.id}`)}
-                      className="py-3 px-4 font-semibold text-navy-900 dark:text-offwhite cursor-pointer hover:underline whitespace-nowrap"
+                      className="py-2 px-2 font-semibold text-navy-900 dark:text-offwhite cursor-pointer hover:underline whitespace-nowrap"
                     >
                       {p.name}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 cursor-pointer">{p.age}</td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 cursor-pointer">{p.gender}</td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 cursor-pointer">
-                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-navy-50 dark:bg-navy-900 border border-navy-100 dark:border-navy-700">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center cursor-pointer">{p.age}</td>
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center cursor-pointer">{p.gender}</td>
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center cursor-pointer">
+                      <span className="px-1.5 py-0.5 rounded text-[11px] font-medium bg-navy-50 dark:bg-navy-900 border border-navy-100 dark:border-navy-700 whitespace-nowrap">
                         {p.bloodGroup}
                       </span>
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono font-medium text-emerald-600 dark:text-emerald-400 cursor-pointer">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center font-mono font-medium text-emerald-600 dark:text-emerald-400 cursor-pointer">
                       {p.hr != null ? `${p.hr}` : "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono font-medium text-teal-600 dark:text-teal-400 cursor-pointer">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center font-mono font-medium text-teal-600 dark:text-teal-400 cursor-pointer">
                       {p.spo2 != null ? `${p.spo2}%` : "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono font-medium text-blue-600 dark:text-blue-400 cursor-pointer whitespace-nowrap">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center font-mono font-medium text-blue-600 dark:text-blue-400 cursor-pointer whitespace-nowrap">
                       {p.bp || "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-purple-600 dark:text-purple-400 cursor-pointer">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center font-mono text-purple-600 dark:text-purple-400 cursor-pointer">
                       {p.ecgRaw != null ? p.ecgRaw : "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-indigo-600 dark:text-indigo-400 cursor-pointer">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center font-mono text-indigo-600 dark:text-indigo-400 cursor-pointer">
                       {p.ppgRaw != null ? p.ppgRaw : "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-teal-600 dark:text-teal-400 cursor-pointer">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center font-mono text-teal-600 dark:text-teal-400 cursor-pointer">
                       {p.pi != null ? `${p.pi}%` : "—"}
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 cursor-pointer">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium border ${
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center cursor-pointer">
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border whitespace-nowrap ${
                         (p.signalQuality || "").toLowerCase() === "good"
                           ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
                           : "bg-navy-50 dark:bg-navy-900 border-navy-100 dark:border-navy-700 text-navy-600 dark:text-navy-300"
@@ -293,19 +365,19 @@ export default function DataPage() {
                         {p.signalQuality || "Good"}
                       </span>
                     </td>
-                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-3 px-4 font-mono text-navy-500 dark:text-navy-300 cursor-pointer whitespace-nowrap">
+                    <td onClick={() => navigate(`/data/${p.id}`)} className="py-2 px-1.5 text-center font-mono text-navy-500 dark:text-navy-300 cursor-pointer whitespace-nowrap">
                       {p.duration != null ? `${p.duration}s` : "0s"}
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-2 px-2 text-right">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           downloadCsvData([p], `CardioPulse_${(p.name || "Patient").replace(/\s+/g, "_")}_Vitals.csv`);
                         }}
-                        className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900 transition"
+                        className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900 transition whitespace-nowrap"
                         title={`Download individual record for ${p.name}`}
                       >
-                        <Download size={12} /> CSV
+                        <Download size={11} /> CSV
                       </button>
                     </td>
                   </tr>
