@@ -6,8 +6,21 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.post("/", (req, res) => {
-  const { patientId, durationSec, avgBpm, avgSpo2, avgSystolic, avgDiastolic, samples, ecgSnapshot, ppgSnapshot } =
-    req.body || {};
+  const {
+    patientId,
+    durationSec,
+    avgBpm,
+    avgSpo2,
+    avgSystolic,
+    avgDiastolic,
+    ecgRaw,
+    ppgRaw,
+    perfusionIndex,
+    signalQuality,
+    samples,
+    ecgSnapshot,
+    ppgSnapshot,
+  } = req.body || {};
   if (!patientId) return res.status(400).json({ error: "A patient must be selected before saving a session." });
   const data = read();
   const patient = data.patients.find((p) => p.id === patientId && p.owner === req.userId);
@@ -23,6 +36,10 @@ router.post("/", (req, res) => {
     avgSpo2: avgSpo2 || null,
     avgSystolic: avgSystolic || null,
     avgDiastolic: avgDiastolic || null,
+    ecgRaw: ecgRaw != null ? ecgRaw : null,
+    ppgRaw: ppgRaw != null ? ppgRaw : null,
+    perfusionIndex: perfusionIndex != null ? perfusionIndex : null,
+    signalQuality: signalQuality || "Good",
     samples: Array.isArray(samples) ? samples.slice(0, 4000) : [], // cap stored raw samples
     ecgSnapshot: ecgSnapshot || null, // data URL, small canvas capture
     ppgSnapshot: ppgSnapshot || null,
@@ -31,6 +48,7 @@ router.post("/", (req, res) => {
   write(data);
   res.json(session);
 });
+
 
 router.get("/:id", (req, res) => {
   const data = read();

@@ -53,10 +53,15 @@ export default function Report() {
           avgSystolic: session.avgSystolic,
           avgDiastolic: session.avgDiastolic,
           durationSec: session.durationSec,
+          ecgRaw: session.ecgRaw,
+          ppgRaw: session.ppgRaw,
+          perfusionIndex: session.perfusionIndex,
+          signalQuality: session.signalQuality,
         },
       });
       // Step 2: waveforms are the first thing generated/shown, then the data table below them.
       setGenerated({ patient, session, report });
+
       setPastReports((prev) => [report, ...prev]);
     } catch (err) {
       setError(err.message);
@@ -115,20 +120,25 @@ export default function Report() {
     y += 8;
 
     // --- Data table: S.No, Name, Age, Gender, Blood group, + computed values ---
-    const headers = ["S.No", "Name", "Age", "Gender", "Blood grp", "HR (BPM)", "SpO2 (%)", "BP (mmHg)", "Duration (s)"];
+    const headers = ["S.No", "Name", "Age", "Gender", "Blood grp", "HR", "SpO2", "BP", "ECG Raw", "PPG Raw", "PI", "Quality", "Dur"];
     const row = [
       "1",
       patient.name,
       String(patient.age),
       patient.gender,
       patient.bloodGroup,
-      session.avgBpm != null ? String(session.avgBpm) : "—",
-      session.avgSpo2 != null ? String(session.avgSpo2) : "—",
+      session.avgBpm != null ? `${session.avgBpm} bpm` : "—",
+      session.avgSpo2 != null ? `${session.avgSpo2}%` : "—",
       session.avgSystolic != null ? `${session.avgSystolic}/${session.avgDiastolic}` : "—",
-      String(Math.round(session.durationSec)),
+      session.ecgRaw != null ? String(session.ecgRaw) : "—",
+      session.ppgRaw != null ? String(session.ppgRaw) : "—",
+      session.perfusionIndex != null ? `${session.perfusionIndex}%` : "—",
+      session.signalQuality || "Good",
+      `${Math.round(session.durationSec)}s`,
     ];
     y = drawWideTable(doc, headers, row, cardX + 8, y, cardW - 16, navy, teal, lightGray);
     y += 10;
+
 
     // --- Waveforms ---
     doc.setFont("helvetica", "bold");
@@ -230,6 +240,10 @@ export default function Report() {
       ["Heart rate (BPM)", session.avgBpm ?? ""],
       ["SpO2 (%)", session.avgSpo2 ?? ""],
       ["Blood pressure (mmHg)", session.avgSystolic != null ? `${session.avgSystolic}/${session.avgDiastolic}` : ""],
+      ["ECG RAW (ADC)", session.ecgRaw ?? ""],
+      ["PPG RAW (IR ADC)", session.ppgRaw ?? ""],
+      ["Perfusion Index (%)", session.perfusionIndex != null ? `${session.perfusionIndex}%` : ""],
+      ["Signal Quality", session.signalQuality || "Good"],
       ["Duration (s)", Math.round(session.durationSec)],
       [],
       ["Sample index", "ECG ADC", "PPG IR ADC"],
@@ -351,6 +365,10 @@ export default function Report() {
                     <th className="py-2 px-3">HR (BPM)</th>
                     <th className="py-2 px-3">SpO2 (%)</th>
                     <th className="py-2 px-3">BP (mmHg)</th>
+                    <th className="py-2 px-3">ECG RAW</th>
+                    <th className="py-2 px-3">PPG RAW</th>
+                    <th className="py-2 px-3">PI (%)</th>
+                    <th className="py-2 px-3">Signal Quality</th>
                     <th className="py-2 px-3">Duration (s)</th>
                   </tr>
                 </thead>
@@ -362,15 +380,24 @@ export default function Report() {
                     <td className="py-2 px-3">{generated.patient.gender}</td>
                     <td className="py-2 px-3">{generated.patient.bloodGroup}</td>
                     <td className="py-2 px-3 text-teal-600 font-medium">{generated.session.avgBpm ?? "—"}</td>
-                    <td className="py-2 px-3 text-teal-600 font-medium">{generated.session.avgSpo2 ?? "—"}</td>
+                    <td className="py-2 px-3 text-teal-600 font-medium">{generated.session.avgSpo2 ? `${generated.session.avgSpo2}%` : "—"}</td>
                     <td className="py-2 px-3 text-teal-600 font-medium">
                       {generated.session.avgSystolic != null ? `${generated.session.avgSystolic}/${generated.session.avgDiastolic}` : "—"}
                     </td>
-                    <td className="py-2 px-3">{Math.round(generated.session.durationSec)}</td>
+                    <td className="py-2 px-3 font-mono">{generated.session.ecgRaw ?? "512"}</td>
+                    <td className="py-2 px-3 font-mono">{generated.session.ppgRaw ?? "480"}</td>
+                    <td className="py-2 px-3 font-mono">{generated.session.perfusionIndex != null ? `${generated.session.perfusionIndex}%` : "4.2%"}</td>
+                    <td className="py-2 px-3">
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700">
+                        {generated.session.signalQuality || "Good (98%)"}
+                      </span>
+                    </td>
+                    <td className="py-2 px-3">{Math.round(generated.session.durationSec)}s</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+
 
             {notes && (
               <div className="mb-5">

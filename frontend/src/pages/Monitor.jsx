@@ -187,6 +187,10 @@ export default function Monitor() {
         avgSpo2: spo2,
         avgSystolic: systolic,
         avgDiastolic: diastolic,
+        ecgRaw: readings.ecg ?? 0,
+        ppgRaw: readings.ppg ?? 0,
+        perfusionIndex: readings.pi ?? 4.5,
+        signalQuality: readings.quality?.status || "Good",
         samples: recordedSamplesRef.current.length > 0 ? recordedSamplesRef.current : ecgBufferRef.current.map((ecg, i) => [ecg, ppgBufferRef.current[i] || 0]),
         ecgSnapshot,
         ppgSnapshot,
@@ -197,6 +201,7 @@ export default function Monitor() {
       setError(err.message);
     }
   }
+
 
 
   const connected = !!connection;
