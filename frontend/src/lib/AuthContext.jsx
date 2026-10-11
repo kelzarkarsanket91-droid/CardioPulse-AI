@@ -1,52 +1,51 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { api } from "./api";
+import { api, setAuthToken } from "./api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // sessionStorage automatically clears when the browser window/tab is closed
-    const token = sessionStorage.getItem("cp-token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    api
-      .me()
-      .then(setUser)
-      .catch(() => sessionStorage.removeItem("cp-token"))
-      .finally(() => setLoading(false));
+    // Clear any previous persistent tokens on initial load / reload
+    sessionStorage.removeItem("cp-token");
+    localStorage.removeItem("cp-token");
+    setAuthToken(null);
+    setUser(null);
+    setLoading(false);
   }, []);
 
   async function register(payload) {
     const { token, user } = await api.register(payload);
-    sessionStorage.setItem("cp-token", token);
+    setAuthToken(token);
     setUser(user);
     return user;
   }
 
   async function login(payload) {
     const { token, user } = await api.login(payload);
-    sessionStorage.setItem("cp-token", token);
+    setAuthToken(token);
     setUser(user);
     return user;
   }
 
   function logout() {
+    setAuthToken(null);
     sessionStorage.removeItem("cp-token");
-    localStorage.removeItem("cp-token"); // clean legacy token if any
+    localStorage.removeItem("cp-token");
     setUser(null);
   }
 
 
   async function refresh() {
+    if (!api.getToken()) return null;
     const me = await api.me();
     setUser((prev) => ({ ...prev, ...me }));
     return me;
   }
+
+
 
   return (
     <AuthContext.Provider value={{ user, loading, register, login, logout, refresh }}>

@@ -1,8 +1,15 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-function getToken() {
-  return sessionStorage.getItem("cp-token") || localStorage.getItem("cp-token");
+let currentAuthToken = null;
+
+function setAuthToken(token) {
+  currentAuthToken = token;
 }
+
+function getToken() {
+  return currentAuthToken;
+}
+
 
 
 async function request(path, { method = "GET", body, auth = true } = {}) {
@@ -43,4 +50,4 @@ export const api = {
   saveReport: (payload) => request("/api/reports", { method: "POST", body: payload }),
 };
 
-export { getToken };
+export { getToken, setAuthToken };
