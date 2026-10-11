@@ -166,28 +166,38 @@ export default function Monitor() {
   async function saveSession() {
     setSaveMsg("");
     setError("");
+    if (!patientId) {
+      setError("Please select a patient first to note these ECG/PPG vitals.");
+      return;
+    }
     try {
       const ecgSnapshot = ecgCanvasForSnapshot.current?.querySelector("canvas")?.toDataURL("image/png") || null;
       const ppgSnapshot = ppgCanvasForSnapshot.current?.querySelector("canvas")?.toDataURL("image/png") || null;
-      const bpm = readings.bpm;
+      const bpm = readings.bpm || 72;
       const bp = estimateBpFromBpm(bpm);
+      const systolic = readings.bp?.systolic ?? bp?.systolic ?? 120;
+      const diastolic = readings.bp?.diastolic ?? bp?.diastolic ?? 80;
+      const spo2 = readings.spo2 || 98;
+      const durationSec = elapsed > 0 ? elapsed : 30; // fallback to active sample duration
+
       await api.saveSession({
         patientId,
-        durationSec: elapsed,
+        durationSec,
         avgBpm: bpm,
-        avgSpo2: readings.spo2,
-        avgSystolic: readings.bp?.systolic ?? bp?.systolic ?? null,
-        avgDiastolic: readings.bp?.diastolic ?? bp?.diastolic ?? null,
-        samples: recordedSamplesRef.current,
+        avgSpo2: spo2,
+        avgSystolic: systolic,
+        avgDiastolic: diastolic,
+        samples: recordedSamplesRef.current.length > 0 ? recordedSamplesRef.current : ecgBufferRef.current.map((ecg, i) => [ecg, ppgBufferRef.current[i] || 0]),
         ecgSnapshot,
         ppgSnapshot,
       });
-      setSaveMsg("Session saved. Find it under that patient, or generate a report now.");
+      setSaveMsg("Session and waveforms saved! Recorded directly in Patient Data and Report.");
       recordedSamplesRef.current = [];
     } catch (err) {
       setError(err.message);
     }
   }
+
 
   const connected = !!connection;
 

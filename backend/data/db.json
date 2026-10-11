@@ -1244,7 +1244,24 @@
         "durationSec": 155
       },
       "generatedAt": "2026-10-11T20:39:04.999Z"
+    },
+    {
+      "id": "92",
+      "serial": "R026",
+      "owner": "1",
+      "patientId": "6",
+      "sessionId": "56",
+      "patientName": "Sanket Kelzarkar",
+      "notes": "",
+      "summary": {
+        "avgBpm": 162,
+        "avgSpo2": 90,
+        "avgSystolic": 146,
+        "avgDiastolic": 96,
+        "durationSec": 114
+      },
+      "generatedAt": "2026-10-11T22:14:13.891Z"
     }
   ],
-  "_seq": 92
+  "_seq": 93
 }
