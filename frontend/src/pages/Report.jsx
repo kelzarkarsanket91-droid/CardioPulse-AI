@@ -373,30 +373,30 @@ export default function Report() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-t border-navy-50">
-                    <td className="py-2.5 px-3 font-medium text-center">1</td>
-                    <td className="py-2.5 px-3 font-semibold text-navy-900 dark:text-offwhite whitespace-nowrap">{generated.patient.name}</td>
-                    <td className="py-2.5 px-3 text-center whitespace-nowrap">{generated.patient.age}</td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">{generated.patient.gender}</td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-navy-50 dark:bg-navy-900 border border-navy-100 dark:border-navy-700">
-                        {generated.patient.bloodGroup}
+                  <tr className="border-t border-navy-100">
+                    <td className="py-2.5 px-3 font-medium text-navy-700 text-center">1</td>
+                    <td className="py-2.5 px-3 font-bold text-navy-950 whitespace-nowrap">{generated.patient.name}</td>
+                    <td className="py-2.5 px-3 text-center font-medium text-navy-800 whitespace-nowrap">{generated.patient.age}</td>
+                    <td className="py-2.5 px-3 text-navy-800 whitespace-nowrap">{generated.patient.gender}</td>
+                    <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                      <span className="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-navy-50 text-navy-900 border border-navy-200">
+                        {generated.patient.bloodGroup || "—"}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-teal-600 font-medium text-center whitespace-nowrap">{generated.session.avgBpm ?? "—"}</td>
-                    <td className="py-2.5 px-3 text-teal-600 font-medium text-center whitespace-nowrap">{generated.session.avgSpo2 ? `${generated.session.avgSpo2}%` : "—"}</td>
-                    <td className="py-2.5 px-3 text-teal-600 font-medium text-center whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-teal-600 font-semibold text-center whitespace-nowrap">{generated.session.avgBpm ?? "—"}</td>
+                    <td className="py-2.5 px-3 text-teal-600 font-semibold text-center whitespace-nowrap">{generated.session.avgSpo2 ? `${generated.session.avgSpo2}%` : "—"}</td>
+                    <td className="py-2.5 px-3 text-teal-600 font-semibold text-center whitespace-nowrap">
                       {generated.session.avgSystolic != null ? `${generated.session.avgSystolic}/${generated.session.avgDiastolic}` : "—"}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-purple-600 dark:text-purple-400 text-center whitespace-nowrap">{generated.session.ecgRaw ?? "512"}</td>
-                    <td className="py-2.5 px-3 font-mono text-indigo-600 dark:text-indigo-400 text-center whitespace-nowrap">{generated.session.ppgRaw ?? "480"}</td>
-                    <td className="py-2.5 px-3 font-mono text-teal-600 dark:text-teal-400 text-center whitespace-nowrap">{generated.session.perfusionIndex != null ? `${generated.session.perfusionIndex}%` : "4.2%"}</td>
+                    <td className="py-2.5 px-3 font-mono font-medium text-purple-700 text-center whitespace-nowrap">{generated.session.ecgRaw ?? "512"}</td>
+                    <td className="py-2.5 px-3 font-mono font-medium text-indigo-700 text-center whitespace-nowrap">{generated.session.ppgRaw ?? "480"}</td>
+                    <td className="py-2.5 px-3 font-mono font-medium text-teal-700 text-center whitespace-nowrap">{generated.session.perfusionIndex != null ? `${generated.session.perfusionIndex}%` : "4.2%"}</td>
                     <td className="py-2.5 px-3 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                         {generated.session.signalQuality || "Good (98%)"}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-center whitespace-nowrap">{Math.round(generated.session.durationSec)}s</td>
+                    <td className="py-2.5 px-3 text-center text-navy-800 whitespace-nowrap">{Math.round(generated.session.durationSec)}s</td>
                   </tr>
                 </tbody>
               </table>
