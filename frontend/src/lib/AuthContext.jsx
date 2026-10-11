@@ -8,7 +8,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("cp-token");
+    // sessionStorage automatically clears when the browser window/tab is closed
+    const token = sessionStorage.getItem("cp-token");
     if (!token) {
       setLoading(false);
       return;
@@ -16,28 +17,30 @@ export function AuthProvider({ children }) {
     api
       .me()
       .then(setUser)
-      .catch(() => localStorage.removeItem("cp-token"))
+      .catch(() => sessionStorage.removeItem("cp-token"))
       .finally(() => setLoading(false));
   }, []);
 
   async function register(payload) {
     const { token, user } = await api.register(payload);
-    localStorage.setItem("cp-token", token);
+    sessionStorage.setItem("cp-token", token);
     setUser(user);
     return user;
   }
 
   async function login(payload) {
     const { token, user } = await api.login(payload);
-    localStorage.setItem("cp-token", token);
+    sessionStorage.setItem("cp-token", token);
     setUser(user);
     return user;
   }
 
   function logout() {
-    localStorage.removeItem("cp-token");
+    sessionStorage.removeItem("cp-token");
+    localStorage.removeItem("cp-token"); // clean legacy token if any
     setUser(null);
   }
+
 
   async function refresh() {
     const me = await api.me();

@@ -1,8 +1,9 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 function getToken() {
-  return localStorage.getItem("cp-token");
+  return sessionStorage.getItem("cp-token") || localStorage.getItem("cp-token");
 }
+
 
 async function request(path, { method = "GET", body, auth = true } = {}) {
   const headers = { "Content-Type": "application/json" };
