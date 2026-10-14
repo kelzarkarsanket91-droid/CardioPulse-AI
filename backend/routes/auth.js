@@ -8,6 +8,17 @@ const router = express.Router();
 
 const VALID_ROLES = ["Doctor (Cardiologist)", "Patient", "Developer", "Nurse", "Pathologist"];
 
+function phoneMatches(inputPhone, storedPhone) {
+  if (!inputPhone || !storedPhone) return false;
+  const c1 = String(inputPhone).replace(/\D/g, "");
+  const c2 = String(storedPhone).replace(/\D/g, "");
+  if (c1 === c2) return true;
+  if (c1.length >= 10 && c2.length >= 10) {
+    return c1.slice(-10) === c2.slice(-10);
+  }
+  return false;
+}
+
 function initials(name) {
   return name
     .trim()
@@ -63,7 +74,7 @@ router.post("/register", (req, res) => {
 
   const data = read();
 
-  if (cleanPhone && data.users.find((u) => u.phone === cleanPhone)) {
+  if (cleanPhone && data.users.find((u) => u.phone && phoneMatches(cleanPhone, u.phone))) {
     return res.status(409).json({ error: "An account with this phone number already exists." });
   }
   if (cleanEmail && data.users.find((u) => u.email && u.email.toLowerCase() === cleanEmail)) {
@@ -100,7 +111,7 @@ router.post("/login", (req, res) => {
 
   const data = read();
   const user = data.users.find((u) => {
-    const matchPhone = cleanPhone && u.phone && u.phone === cleanPhone;
+    const matchPhone = cleanPhone && u.phone && phoneMatches(cleanPhone, u.phone);
     const matchEmail = u.email && u.email.toLowerCase() === cleanEmail;
     return matchPhone || matchEmail;
   });
@@ -191,7 +202,7 @@ router.post("/forgot-password/request-otp", async (req, res) => {
   }
   const cleanPhone = String(phone).replace(/\D/g, "");
   const data = read();
-  const user = data.users.find((u) => u.phone === cleanPhone);
+  const user = data.users.find((u) => u.phone && phoneMatches(cleanPhone, u.phone));
   if (!user) {
     return res.status(404).json({ error: "No account found with this phone number." });
   }
@@ -200,12 +211,15 @@ router.post("/forgot-password/request-otp", async (req, res) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
 
-  otpStore.set(cleanPhone, { otp, expiresAt });
+  otpStore.set(cleanPhone, { otp, expiresAt, userId: user.id });
+  if (user.phone && user.phone !== cleanPhone) {
+    otpStore.set(user.phone, { otp, expiresAt, userId: user.id });
+  }
 
   console.log(`[CardioPulse OTP] Generated OTP for ${cleanPhone}: ${otp}`);
 
   // Send real SMS via MSG91
-  const smsResult = await sendMsg91Otp(cleanPhone, otp);
+  const smsResult = await sendMsg91Otp(user.phone || cleanPhone, otp);
 
   res.json({
     ok: true,
@@ -228,13 +242,16 @@ router.post("/forgot-password/reset", (req, res) => {
     return res.status(400).json({ error: "Password must be at least 6 characters." });
   }
 
-  const record = otpStore.get(cleanPhone);
+  const data = read();
+  const user = data.users.find((u) => u.phone && phoneMatches(cleanPhone, u.phone));
+  const record = otpStore.get(cleanPhone) || (user && user.phone ? otpStore.get(user.phone) : null);
   if (!record) {
     return res.status(400).json({ error: "No OTP was requested or it has expired. Please request a new one." });
   }
 
   if (Date.now() > record.expiresAt) {
     otpStore.delete(cleanPhone);
+    if (user && user.phone) otpStore.delete(user.phone);
     return res.status(400).json({ error: "OTP has expired. Please request a new one." });
   }
 
@@ -242,8 +259,6 @@ router.post("/forgot-password/reset", (req, res) => {
     return res.status(400).json({ error: "Invalid OTP code entered." });
   }
 
-  const data = read();
-  const user = data.users.find((u) => u.phone === cleanPhone);
   if (!user) {
     return res.status(404).json({ error: "User not found." });
   }
@@ -251,6 +266,7 @@ router.post("/forgot-password/reset", (req, res) => {
   user.passwordHash = bcrypt.hashSync(newPassword, 10);
   write(data);
   otpStore.delete(cleanPhone);
+  if (user.phone) otpStore.delete(user.phone);
 
   res.json({ ok: true, message: "Password has been reset successfully. You can now log in." });
 });

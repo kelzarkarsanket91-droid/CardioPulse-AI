@@ -1,4 +1,14 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const envUrl = import.meta.env.VITE_API_URL;
+const isRemote =
+  typeof window !== "undefined" &&
+  window.location.hostname !== "localhost" &&
+  window.location.hostname !== "127.0.0.1";
+
+// On remote hosts (like Vercel), use relative path "" if VITE_API_URL is unset or contains localhost to prevent Mixed Content / connection failures
+const BASE_URL =
+  isRemote && (!envUrl || envUrl.includes("localhost"))
+    ? ""
+    : (envUrl || "");
 
 let currentAuthToken = null;
 
