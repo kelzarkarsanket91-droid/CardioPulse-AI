@@ -7,7 +7,7 @@ router.use(requireAuth);
 
 router.get("/", (req, res) => {
   const data = read();
-  const mine = data.patients.filter((p) => p.owner === req.userId);
+  const mine = data.patients || [];
   const withMetrics = mine.map((p) => {
     const patientSessions = data.sessions
       .filter((s) => s.patientId === p.id)
@@ -78,7 +78,7 @@ router.post("/", (req, res) => {
 
 router.get("/:id", (req, res) => {
   const data = read();
-  const patient = data.patients.find((p) => p.id === req.params.id && p.owner === req.userId);
+  const patient = data.patients.find((p) => p.id === req.params.id);
   if (!patient) return res.status(404).json({ error: "Patient not found." });
   const sessions = data.sessions
     .filter((s) => s.patientId === patient.id)
@@ -88,10 +88,10 @@ router.get("/:id", (req, res) => {
 
 router.delete("/:id", (req, res) => {
   const data = read();
-  const patient = data.patients.find((p) => p.id === req.params.id && p.owner === req.userId);
+  const patient = data.patients.find((p) => p.id === req.params.id);
   if (!patient) return res.status(404).json({ error: "Patient not found." });
 
-  data.patients = data.patients.filter((p) => p.id !== patient.id || p.owner !== req.userId);
+  data.patients = data.patients.filter((p) => p.id !== patient.id);
   data.sessions = data.sessions.filter((s) => s.patientId !== patient.id);
   write(data);
   res.json({ ok: true });

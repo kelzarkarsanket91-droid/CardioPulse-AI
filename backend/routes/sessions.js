@@ -23,7 +23,7 @@ router.post("/", (req, res) => {
   } = req.body || {};
   if (!patientId) return res.status(400).json({ error: "A patient must be selected before saving a session." });
   const data = read();
-  const patient = data.patients.find((p) => p.id === patientId && p.owner === req.userId);
+  const patient = data.patients.find((p) => p.id === patientId);
   if (!patient) return res.status(404).json({ error: "Patient not found." });
 
   const session = {
@@ -52,7 +52,7 @@ router.post("/", (req, res) => {
 
 router.get("/:id", (req, res) => {
   const data = read();
-  const session = data.sessions.find((s) => s.id === req.params.id && s.owner === req.userId);
+  const session = data.sessions.find((s) => s.id === req.params.id);
   if (!session) return res.status(404).json({ error: "Session not found." });
   res.json(session);
 });

@@ -7,8 +7,8 @@ router.use(requireAuth);
 
 router.get("/", (req, res) => {
   const data = read();
-  const mine = data.reports.filter((r) => r.owner === req.userId);
-  res.json(mine.sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt)));
+  const allReports = data.reports || [];
+  res.json(allReports.sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt)));
 });
 
 router.post("/", (req, res) => {
@@ -17,13 +17,12 @@ router.post("/", (req, res) => {
     return res.status(400).json({ error: "Select a patient and a session before generating a report." });
   }
   const data = read();
-  const patient = data.patients.find((p) => p.id === patientId && p.owner === req.userId);
-  const session = data.sessions.find((s) => s.id === sessionId && s.owner === req.userId && s.patientId === patientId);
+  const patient = data.patients.find((p) => p.id === patientId);
+  const session = data.sessions.find((s) => s.id === sessionId && s.patientId === patientId);
   if (!patient || !session) {
     return res.status(404).json({ error: "The selected patient and session do not match." });
   }
-  const mineCount = data.reports.filter((r) => r.owner === req.userId).length;
-  const serial = `R${String(mineCount + 1).padStart(3, "0")}`;
+  const serial = `R${String((data.reports?.length || 0) + 1).padStart(3, "0")}`;
   const report = {
     id: nextId(data),
     serial,
